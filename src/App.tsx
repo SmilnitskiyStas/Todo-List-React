@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { type Todo } from './types/todo';
-import { Button } from "./components/ui/button";
+// import { Button } from "./components/ui/button";
 import TodoList from "@/components/TodoList/TodoList";
 import { supabase } from './lib/supabaseClient';
+import AddTodoForm from "./components/AddTodoForm/AddTodoForm";
 
 
 // -- Імітація отримання даних від API --
@@ -25,6 +26,7 @@ async function fetchTodosFromSupabase(): Promise<Todo[]> {
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isAdding, setIsAdding] = useState<boolean>(false);
 
   useEffect(() => {
     const loadTodos = async () => {
@@ -70,13 +72,13 @@ function App() {
   };
 
   // -- Add new task --
-  const handleAddTodo = async () => {
-    const newTodoTitle = prompt("Введіть назву нового завдання:");
-    if (newTodoTitle && newTodoTitle.trim() !== '') {
+  const handleAddTodo = async (title: string) => {
+    try {
+      setIsAdding(true);
       const { data, error } = await supabase
         .from('todos')
         .insert([
-          { title: newTodoTitle.trim(), completed: false }
+          { title: title.trim(), completed: false }
         ])
         .select();
       
@@ -86,12 +88,19 @@ function App() {
       } else if (data && data.length > 0) {
         setTodos(prevTodos => [...prevTodos, data[0] as Todo]);
       }
+    } catch (error) {
+      console.error("Непередбачена помилка при додаванні:", error);
+    } finally {
+      setIsAdding(false);
     }
+    
   };
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-8">
       <h1 className="text-5xl font-extrabold text-blue-700 mb-8">Мій список To-Do List</h1>
+
+      <AddTodoForm onAddTodo={handleAddTodo} isAdding={ isAdding } />
 
       {loading ? (
         <p className="text-2xl text-gray-700">Завантажуємо завдання...</p>
@@ -99,10 +108,10 @@ function App() {
           <TodoList todos={todos} onToggleComplete={ handleToggleComplete } />   
       )}
 
-      <Button
+      {/* <Button
         className="mt-8 px-6 py-3 text-lg bg-green-500 hover:bg-green-600 text-white"
         onClick={handleAddTodo}
-      >Додати нове завдання</Button>
+      >Додати нове завдання</Button> */}
     </div>
   )
 }
