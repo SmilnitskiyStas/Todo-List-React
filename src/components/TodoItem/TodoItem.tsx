@@ -3,6 +3,7 @@ import { type Todo } from "@/types/todo"; // Імпортуємо наш інт�
 import { Button } from '../ui/button';
 import { Trash2, Pencil } from 'lucide-react';
 import { Input } from '../ui/input';
+import { motion } from 'framer-motion';
 
 // --- Визначення інтерфейсу для пропсів TodoItem ---
 interface TodoItemProps {
@@ -42,7 +43,13 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggleComplete, onDelete, o
   };
 
   return (
-      <div className="flex items-center justify-between p-4 mb-2 bg-white rounded-lg shadow-sm group">
+    <motion.div
+      layout
+      initial={{opacity: 0, y: 50, scale: 0.8}}
+      animate={{opacity: 1, y: 0, scale: 1}}
+      exit={{opacity: 0, x: -100, transition: {duration: 0.3}}}
+      transition={{type: "spring", stiffness: 500, damping: 30}}
+      className="flex items-center justify-between p-4 mb-2 bg-white rounded-lg shadow-sm group">
           <div className='flex items-center flex-grow'>
             <input
                 type="checkbox"
@@ -60,12 +67,14 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggleComplete, onDelete, o
             autoFocus
           />
         ) : (
-            <span
+            <motion.span
               className={`flex-grow ml-4 text-lg ${todo.completed ? 'line-throgh text-gray-500' : 'text-gray-800'} cursor-pointer`}
               onDoubleClick={() => setIsEditing(true)}
+              animate={{color: todo.completed ? '#6b7280' : '#1f2937'}}
+              transition={{duration: 0.2}}
             >
               {todo.title}
-            </span>
+            </motion.span>
         )}
       </div>
       {/* Кнопки дій */}
@@ -76,6 +85,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggleComplete, onDelete, o
             variant="ghost"
             size="icon"
             onClick={() => setIsEditing(true)}
+            className='ml-4 text-gray-400 hover:text-ted-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200'
           >
             <Pencil className="h-5 w-5"/>
           </Button>
@@ -86,11 +96,11 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggleComplete, onDelete, o
           variant="ghost"
           size="icon"
           onClick={() => onDelete(todo.id)}
-          className='ml-4 text-gray-400 hover:text-ted-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200'
+          className='ml-4 text-red-400 hover:text-ted-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200'
       >
           <Trash2 className='h-5 w-5'/> {/* Покажеться значок смітника */}
       </Button>
-    </div>
+    </motion.div>
   );
 };
 
